@@ -101,8 +101,8 @@ body {
 
 /* title and subtitle, above the ceiling line, as on the cover */
 #mast {
-  position: fixed; left: 0; right: 0; top: 7vh; text-align: center;
-  pointer-events: none;
+  position: fixed; left: 0; right: 0; top: 2.7vh; text-align: center;
+  pointer-events: none;   /* 2.7vh is where the cover starts its title, 0.23in of 8.5 */
 }
 /* The masthead is the cover's own title lockup, traced from the printed artwork:
    THE, WINDOWLESS, ROOM and the subtitle, in the proportions and spacing the cover
@@ -207,19 +207,19 @@ body {
 </header>
 
 <nav id="dock">
-  <a class="door" id="btn-paperback" href="#TODO-amazon-paperback">
+  <a class="door" id="btn-paperback" href="https://www.amazon.com/dp/B0HG6B77QM">
     <span class="main">PAPERBACK</span>
     <span class="sub">AMAZON</span>
   </a>
-  <a class="door" id="btn-hardcover" href="#TODO-amazon-hardcover">
+  <a class="door" id="btn-hardcover" href="https://www.amazon.com/dp/B0HG5YNYBF">
     <span class="main">HARDCOVER</span>
     <span class="sub">AMAZON</span>
   </a>
-  <a class="door free" id="btn-digital" href="#TODO-archive-pdf">
+  <a class="door free" id="btn-digital" href="https://archive.org/details/the-windowless-room">
     <span class="main">DIGITAL</span>
     <span class="sub">FREE &#183; ARCHIVE</span>
   </a>
-  <a class="door free" id="btn-audio" href="#TODO-archive-audio">
+  <a class="door free" id="btn-audio" href="https://archive.org/details/the-windowless-room-audiobook">
     <span class="main">AUDIOBOOK</span>
     <span class="sub">FREE &#183; ARCHIVE</span>
   </a>
@@ -317,7 +317,9 @@ body {
      cover's share of the page. It keeps the cover's clearance instead: whatever
      height is left between the masthead and that line, and never a pixel more. */
   var LOCKUP_AR = 408.00 / 245.33,   /* the traced lockup's own proportion */
-      CEIL_CLEAR = 0.1335;           /* the cover's clearance, as a share of ceiling depth */
+      SUB_FRAC   = 3.5034 / 4.08,    /* the subtitle's width, as a share of the lockup's */
+      CEIL_CLEAR_D = 0.070,          /* clearance on desktop, as a share of ceiling depth */
+      CEIL_CLEAR_M = 0.1335;         /* on a phone, the cover's own clearance. leave it. */
 
   function resize() {
     vw = innerWidth; vh = innerHeight;
@@ -342,10 +344,16 @@ body {
     skirtY = vy + D_SKIRT * k;
     gap    = (D_SK2 - D_SKIRT) * k;   /* the skirting's own thickness, at the corner */
     artW   = Math.max(LINE_ART, MIN_PX / k);   /* one weight for room and furniture alike */
-    /* fit the title above the ceiling before anything is drawn under it */
-    var floorLine = ceilY * (1 - CEIL_CLEAR) - mast.getBoundingClientRect().top,
-        byWidth   = Math.min(vw * 0.86, 660) / LOCKUP_AR;
-    lockup.style.height = Math.max(0, Math.min(floorLine, byWidth)).toFixed(1) + 'px';
+    /* Fit the title above the ceiling before anything is drawn under it.
+       The ceiling is a shallow V, lowest at the corner and rising toward both
+       edges, so the binding point is not the middle of the subtitle but its two
+       outer ends, and how far out those sit depends on how big the lockup is.
+       Solve for that rather than leaving the slack unused. */
+    var CEIL_CLEAR = mobile ? CEIL_CLEAR_M : CEIL_CLEAR_D,
+        headroom   = ceilY * (1 - CEIL_CLEAR) - mast.getBoundingClientRect().top,
+        rise       = 1 + CEIL_M_L * SUB_FRAC * LOCKUP_AR / 2,
+        byWidth    = Math.min(vw * 0.90, 900) / LOCKUP_AR;
+    lockup.style.height = Math.max(0, Math.min(headroom / rise, byWidth)).toFixed(1) + 'px';
     lockup.style.width  = 'auto';
     lockup.style.maxHeight = 'none';
 
