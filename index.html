@@ -325,8 +325,13 @@ body {
     vw = innerWidth; vh = innerHeight;
     cx = vw / 2;
     var mobile = vw < 900 || vh / vw > 10 / 9;
-    var ceilF  = mobile ? 0.245 : 0.250,
-        skirtF = mobile ? 0.560 : 0.690;
+    /* The ceiling is what caps the title, so making the title bigger means hanging
+       the ceiling lower. The cover puts its own ceiling at 36.43% of the page. These
+       sit just under that, which is both what the title needs and closer to the
+       cover than the 25% this used to run at. The skirting moves with it on a phone
+       so the room keeps something near the cover's own depth. */
+    var ceilF  = mobile ? 0.339 : 0.360,
+        skirtF = mobile ? 0.613 : 0.690;
     var SPAN = D_SKIRT - D_CEIL;
     ceilY = ceilF * vh;
     k = Math.min((skirtF - ceilF) * vh / SPAN, vw / 2100);
